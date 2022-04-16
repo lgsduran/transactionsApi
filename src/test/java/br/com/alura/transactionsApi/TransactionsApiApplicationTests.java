@@ -1,0 +1,13 @@
+package br.com.alura.transactionsApi;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TransactionsApiApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
