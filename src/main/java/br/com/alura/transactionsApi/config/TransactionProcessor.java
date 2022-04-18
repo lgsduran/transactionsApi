@@ -1,6 +1,12 @@
 package br.com.alura.transactionsApi.config;
 
-import java.lang.reflect.Field;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.batch.item.ItemProcessor;
 
@@ -10,25 +16,51 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 
 	@Override
 	public Transaction process(TransactionFile item) throws Exception {
-		Field[] fields = item.getClass().getFields();
-		for (Field field : fields) {
-			System.out.println("+++++"+field);
+		
+		if (skipEmptyFields(item)) {
+			Transaction transaction = new Transaction();
+			transaction.setBancoOrigem(item.getBancoOrigem());
+			transaction.setAgenciaOrigem(item.getAgenciaOrigem());
+			transaction.setContaOrigem(item.getContaOrigem());
+			transaction.setBancoDestino(item.getBancoDestino());
+			transaction.setAgenciaDestino(item.getAgenciaDestino());
+			transaction.setContaDestino(item.getContaDestino());
+			transaction.setValorTransacao(item.getValorTransacao());
+			transaction.setDataHoraTransacao(item.getDataHoraTransacao());
+			return transaction;			
 		}
-		System.out.println("------------------------");
-		Transaction transaction = new Transaction();
-		transaction.setBancoOrigem(item.getBancoOrigem());
-		transaction.setAgenciaOrigem(item.getAgenciaOrigem());
-		System.out.println("----> "+item.getAgenciaOrigem());
-		transaction.setContaOrigem(item.getContaOrigem());
-		transaction.setBancoDestino(item.getBancoDestino());
-		transaction.setAgenciaDestino(item.getAgenciaDestino());
-		System.out.println("----> "+item.getAgenciaDestino());
-		transaction.setContaDestino(item.getContaDestino());
-		transaction.setValorTransacao(item.getValorTransacao());
-		System.out.println("----> "+item.getDataHoraTransacao());
-		transaction.setDataHoraTransacao(item.getDataHoraTransacao());
-		System.out.println("------------------------");
-		return transaction;
+		
+		return null;
+		
 	}
-    
+	
+	private boolean skipEmptyFields(TransactionFile item) {
+		List<String> itemList = Stream.of("agenciaDestino", "agenciaOrigem", "bancoDestino", "bancoOrigem",
+				"contaDestino", "contaOrigem", "dataHoraTransacao", "valorTransacao").collect(Collectors.toList());
+
+		int i = 0;
+
+		PropertyDescriptor[] propDescArr;
+		try {
+			propDescArr = Introspector.getBeanInfo(TransactionFile.class).getPropertyDescriptors();
+
+			for (PropertyDescriptor p : propDescArr) {
+				if (itemList.contains(p.getName()) && !p.getReadMethod().invoke(item).toString().isBlank()) {
+					System.out.println("+++++" + p.getName() + "---" + p.getReadMethod().invoke(item));
+					i++;
+				}
+			}
+
+			if (itemList.size() == i) {
+				return true;
+			}
+
+		} catch (IntrospectionException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
 }

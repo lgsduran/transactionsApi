@@ -28,7 +28,8 @@ public class BatchConfig {
 	private JobBuilderFactory jobBuilderFactory;
 	private StepBuilderFactory stepBuilderFactory;
 	private TransactionRepository transactionRepository;
-	private final String file_path = "/Users/luizduran/eclipse-workspace/alura-workspace/transactionsApi/inputFile/transacoes-2022-01-01.csv";
+//	private final String file_path = "/Users/luizduran/eclipse-workspace/alura-workspace/transactionsApi/inputFile/transacoes-2022-01-01.csv";
+	private final String file_path = "C:\\Users\\Qintess\\eclipse-workspace\\workspace-alura\\transactionsApi\\inputFile\\transacoes-2022-01-01.csv";
 
 	public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
 			TransactionRepository transactionRepository) {
