@@ -46,7 +46,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 
 			for (PropertyDescriptor p : propDescArr) {
 				if (itemList.contains(p.getName()) && !p.getReadMethod().invoke(item).toString().isBlank()) {
-					System.out.println("+++++" + p.getName() + "---" + p.getReadMethod().invoke(item));
+					System.out.println("Column ---> " + p.getName() + " Value ---> " + p.getReadMethod().invoke(item));
 					i++;
 				}
 			}
