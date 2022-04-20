@@ -24,7 +24,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 		if (!skipEmptyFields(item))
 			return null;
 
-		valitadeDate(item);
+		extractFirstDate(item);
 		String dateFromFile = item.getDataHoraTransacao().substring(0,
 				item.getDataHoraTransacao().toUpperCase().indexOf("T"));
 
@@ -66,7 +66,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 		return false;
 	}
 	
-	private void valitadeDate(TransactionFile item) throws Exception {
+	private void extractFirstDate(TransactionFile item) throws Exception {
 		if (firstDateFromFile == null) {
 			Optional<PropertyDescriptor> first = Stream.of(getProperties(TransactionFile.class))
 					.filter(p -> p.getName().equalsIgnoreCase("dataHoraTransacao"))
