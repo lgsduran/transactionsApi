@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.alura.transactionsApi.repository.TransactionRepository;
+
 @RestController
 @RequestMapping(path = "/batch")
 public class TransactionController {
@@ -25,10 +27,14 @@ public class TransactionController {
 	@Autowired
 	Job job;
 	
+	@Autowired
+	TransactionRepository transactionRepository;
+	
 	@PostMapping(path = "/start")
 	public String startBatch() {
 		DadosExecucao.setFirstDateFromFile(null);
 		DadosExecucao.setFlag(true);
+		DadosExecucao.setTable(transactionRepository.findAll().isEmpty());
 		
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("startAt", System.currentTimeMillis()).toJobParameters();
