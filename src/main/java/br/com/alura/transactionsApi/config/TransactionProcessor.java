@@ -35,7 +35,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 	public Transaction process(TransactionFile item) throws Exception {
 		extractFirstDate(item);
 		
-		if (DadosExecucao.isFlag()) {
+		if (DadosExecucao.isFlag() && !DadosExecucao.isTable()) {
 			if (isTransactionDuplicated(DadosExecucao.getFirstDateFromFile())) {
 				throw new BusinessException("Found duplicated records!");				
 			}			
@@ -64,9 +64,9 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 	private boolean isTransactionDuplicated(String firstDateFromFile) {
 			Optional<Transaction> registers = getRegisters(transactionRepository.findAll(),
 					x -> extractDateFromString(x.getDataHoraTransacao(), "T").equals(firstDateFromFile));
+			DadosExecucao.setTable(registers.isEmpty());
 			if (registers.isPresent())
-				return true;			
-		
+				return true;		
 
 		return false;		
 	}

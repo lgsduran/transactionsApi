@@ -9,5 +9,6 @@ public class DataExecution {
 	
 	private String firstDateFromFile;
 	private boolean flag;
+	private boolean isTable;
 
 }
