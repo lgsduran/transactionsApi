@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -16,8 +17,10 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
+import br.com.alura.transactionsApi.exceptions.BusinessException;
 import br.com.alura.transactionsApi.model.Transaction;
 import br.com.alura.transactionsApi.repository.TransactionRepository;
 
@@ -28,6 +31,7 @@ public class BatchConfig {
 	private JobBuilderFactory jobBuilderFactory;
 	private StepBuilderFactory stepBuilderFactory;
 	private TransactionRepository transactionRepository;
+//	private ItemReader<TransactionFile> delegate;
 //	private final String file_path = "/Users/luizduran/eclipse-workspace/alura-workspace/transactionsApi/inputFile/transacoes-2022-01-01.csv";
 	private final String file_path = "C:\\Users\\Qintess\\eclipse-workspace\\workspace-alura\\transactionsApi\\inputFile\\transacoes-2022-01-01.csv";
 
@@ -66,22 +70,24 @@ public class BatchConfig {
 //	}
 
 	@Bean
-	public Job chunkJob() {
+	public Job job() {
 		return jobBuilderFactory
-				.get("Chunk Job")
+				.get("Job")
 				.incrementer(new RunIdIncrementer())
-				.start(chunkStep())
+				.start(step())
 				.build();
 	}
 
 	@Bean
-	public Step chunkStep() {
-		return stepBuilderFactory.get("chunkStep")
+	public Step step() {
+		return stepBuilderFactory.get("Step")
 				.<TransactionFile, Transaction>chunk(3)
+				 .listener(new StepItemProcessListener())
 				.reader(reader())
 				.processor(processor())
 				.writer(writer())
 				.faultTolerant()
+				.noSkip(BusinessException.class)
 				.skip(Throwable.class)
 				.skipLimit(Integer.MAX_VALUE)			
 				.build();
@@ -114,13 +120,26 @@ public class BatchConfig {
                 });            
             }
         });
+        try {
+        	flatFileItemReader.open(new ExecutionContext());
+			System.out.println(flatFileItemReader.read().getDataHoraTransacao());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return flatFileItemReader;
     }
 	
+//	@Bean
+//	public ItemReader<TransactionFile> reader(){
+//		return new TransactionReader(file_path);
+//	}
+	
 	@Bean
 	public ItemProcessor<TransactionFile, Transaction> processor() {
-		return new TransactionProcessor();
+		return new TransactionProcessor(transactionRepository);
 	}
+	
 	
 //	@Bean
 //	public JdbcBatchItemWriter<Transaction> writer() {

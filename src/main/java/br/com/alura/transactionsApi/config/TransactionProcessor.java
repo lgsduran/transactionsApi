@@ -6,27 +6,41 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.batch.item.ItemProcessor;
 
+import br.com.alura.transactionsApi.exceptions.BusinessException;
+import br.com.alura.transactionsApi.helpers.ExtractorHelper;
+import br.com.alura.transactionsApi.helpers.SupplierHelper;
 import br.com.alura.transactionsApi.model.Transaction;
+import br.com.alura.transactionsApi.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TransactionProcessor implements ItemProcessor<TransactionFile, Transaction>  {
 
+	private TransactionRepository transactionRepository;
 	private String firstDateFromFile = null;
+
+	public TransactionProcessor(TransactionRepository transactionRepository) {
+		this.transactionRepository = transactionRepository;
+	}
 
 	@Override
 	public Transaction process(TransactionFile item) throws Exception {
+		extractFirstDate(item);
+		
+//		if (isTransactionDuplicated(firstDateFromFile)) {
+//			throw new BusinessException("Found duplicated records!");				
+//		}			
+			
 		if (!skipEmptyFields(item))
 			return null;
 
-		extractFirstDate(item);
-		String dateFromFile = item.getDataHoraTransacao().substring(0,
-				item.getDataHoraTransacao().toUpperCase().indexOf("T"));
+		String dateFromFile = extractDateFromString(item.getDataHoraTransacao(), "T");
 
 		if (!firstDateFromFile.equals(dateFromFile))
 			return null;
@@ -43,13 +57,23 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 		return transaction;
 	}
 	
+	private boolean isTransactionDuplicated(String firstDateFromFile) {
+			Optional<Transaction> registers = getRegisters(transactionRepository.findAll(),
+					x -> extractDateFromString(x.getDataHoraTransacao(), "T").equals(firstDateFromFile));
+			if (registers.isPresent())
+				return true;			
+		
+
+		return false;		
+	}
+	
 	private boolean skipEmptyFields(TransactionFile item) {
 		int counter = 0;		
 		try {		
 
 			for (PropertyDescriptor p : getProperties(TransactionFile.class)) {
 				if (fields().contains(p.getName()) && !p.getReadMethod().invoke(item).toString().isBlank()) {
-					log.info("Column ---> {} Value ---> {}", p.getName(), p.getReadMethod().invoke(item));
+					log.info("Column ---> {} | Value ---> {}", p.getName(), p.getReadMethod().invoke(item));
 					counter++;
 				}
 			}
@@ -74,7 +98,7 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 			
 			if (first.isPresent()) {
 				String str = first.get().getReadMethod().invoke(item).toString();
-				firstDateFromFile = str.substring(0, str.toUpperCase().indexOf("T"));
+				firstDateFromFile = extractDateFromString(str, "T");
 			}			
 		}		
 	}
@@ -88,5 +112,15 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 	private PropertyDescriptor[] getProperties(Class<?> beanClass) throws IntrospectionException {
 		return Introspector.getBeanInfo(beanClass).getPropertyDescriptors();
 	}
+	
+	private String extractDateFromString(String str, String index) {
+		return new ExtractorHelper().extractDateFromString(str, index);		
+	}
+	
+	public <T> Optional<T> getRegisters(List<T> list, Predicate<? super T> value) {
+		return new SupplierHelper().getRegisters(list, value);
+	}
+	
+	
 
 }
