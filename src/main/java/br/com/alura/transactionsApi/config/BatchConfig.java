@@ -17,7 +17,6 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
 import br.com.alura.transactionsApi.exceptions.BusinessException;
@@ -75,6 +74,7 @@ public class BatchConfig {
 				.get("Job")
 				.incrementer(new RunIdIncrementer())
 				.start(step())
+				.listener(new JobResultListener())
 				.build();
 	}
 
@@ -82,7 +82,10 @@ public class BatchConfig {
 	public Step step() {
 		return stepBuilderFactory.get("Step")
 				.<TransactionFile, Transaction>chunk(3)
+				 .listener(new StepResultListener())
+				 .listener(new StepItemReadListener())
 				 .listener(new StepItemProcessListener())
+				 .listener(new StepItemWriteListener())
 				.reader(reader())
 				.processor(processor())
 				.writer(writer())
@@ -116,17 +119,9 @@ public class BatchConfig {
                     {
                         setTargetType(TransactionFile.class);						 
                     }
-
                 });            
             }
         });
-        try {
-        	flatFileItemReader.open(new ExecutionContext());
-			System.out.println(flatFileItemReader.read().getDataHoraTransacao());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         return flatFileItemReader;
     }
 	

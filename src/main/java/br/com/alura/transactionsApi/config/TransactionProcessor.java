@@ -1,5 +1,7 @@
 package br.com.alura.transactionsApi.config;
 
+import static br.com.alura.transactionsApi.config.MassaExecution.DadosExecucao;
+
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -23,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TransactionProcessor implements ItemProcessor<TransactionFile, Transaction>  {
 
 	private TransactionRepository transactionRepository;
-	private String firstDateFromFile = null;
+//	private String firstDateFromFile = null;
 
 	public TransactionProcessor(TransactionRepository transactionRepository) {
 		this.transactionRepository = transactionRepository;
@@ -33,16 +35,18 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 	public Transaction process(TransactionFile item) throws Exception {
 		extractFirstDate(item);
 		
-//		if (isTransactionDuplicated(firstDateFromFile)) {
-//			throw new BusinessException("Found duplicated records!");				
-//		}			
+		if (DadosExecucao.isFlag()) {
+			if (isTransactionDuplicated(DadosExecucao.getFirstDateFromFile())) {
+				throw new BusinessException("Found duplicated records!");				
+			}			
+		}
 			
 		if (!skipEmptyFields(item))
 			return null;
 
 		String dateFromFile = extractDateFromString(item.getDataHoraTransacao(), "T");
 
-		if (!firstDateFromFile.equals(dateFromFile))
+		if (!DadosExecucao.getFirstDateFromFile().equals(dateFromFile))
 			return null;
 
 		Transaction transaction = new Transaction();
@@ -91,14 +95,14 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 	}
 	
 	private void extractFirstDate(TransactionFile item) throws Exception {
-		if (firstDateFromFile == null) {
+		if (DadosExecucao.getFirstDateFromFile() == null) {
 			Optional<PropertyDescriptor> first = Stream.of(getProperties(TransactionFile.class))
 					.filter(p -> p.getName().equalsIgnoreCase("dataHoraTransacao"))
 					.findFirst();
 			
 			if (first.isPresent()) {
 				String str = first.get().getReadMethod().invoke(item).toString();
-				firstDateFromFile = extractDateFromString(str, "T");
+				DadosExecucao.setFirstDateFromFile(extractDateFromString(str, "T"));
 			}			
 		}		
 	}

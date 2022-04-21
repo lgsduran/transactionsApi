@@ -1,5 +1,7 @@
 package br.com.alura.transactionsApi.controller;
 
+import static br.com.alura.transactionsApi.config.MassaExecution.DadosExecucao;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -25,6 +27,9 @@ public class TransactionController {
 	
 	@PostMapping(path = "/start")
 	public String startBatch() {
+		DadosExecucao.setFirstDateFromFile(null);
+		DadosExecucao.setFlag(true);
+		
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("startAt", System.currentTimeMillis()).toJobParameters();
         try {
