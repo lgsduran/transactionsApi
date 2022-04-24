@@ -7,6 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -15,12 +18,12 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import br.com.alura.transactionsApi.entity.FileEntity;
+import br.com.alura.transactionsApi.entity.FileInfo;
 import br.com.alura.transactionsApi.exceptions.BusinessException;
 import br.com.alura.transactionsApi.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +35,16 @@ public class JobServiceImpl implements IJobService {
 	private JobLauncher jobLauncher;
 	private Job job;
 	private TransactionRepository transactionRepository;
+	private FileInfoServiceImpl fileInfoServiceImpl;
 
 //	@Value("${value.filePath}")
-	private String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "inputFile" + File.separator;
+	private final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "inputFile" + File.separator;
 
-	public JobServiceImpl(JobLauncher jobLauncher, Job job, TransactionRepository transactionRepository) {
+	public JobServiceImpl(JobLauncher jobLauncher, Job job, TransactionRepository transactionRepository, FileInfoServiceImpl fileInfoServiceImpl) {
 		this.jobLauncher = jobLauncher;
 		this.job = job;
 		this.transactionRepository = transactionRepository;
+		this.fileInfoServiceImpl = fileInfoServiceImpl;
 	}
 
 	@Override
@@ -66,16 +71,24 @@ public class JobServiceImpl implements IJobService {
 		if (execution.getStatus() == BatchStatus.FAILED)
 			throw new BusinessException("Job " + execution.getJobId() + " is " + execution.getStatus());
 		
-		addFile(fileName);
+		FileInfo fileInfo = new FileInfo();
+		fileInfo.setFileName(fileName);
+		this.fileInfoServiceImpl.save(fileInfo);
 		log.info("File added successfully.");
 
 		attributes.addFlashAttribute("message", "You successfully uploaded " + fileName + '!');
 		return "redirect:/";
-	}
-
-	private void addFile(String fileName) {
-		FileEntity fileEntity = new FileEntity(fileName);
-		transactionRepository.save(fileEntity);
+	}	
+	
+	@Override
+	public String getFiles(Model model) {
+		log.info("Get Files");
+		List<FileInfo> files = this.fileInfoServiceImpl.getFiles();
+		List<FileInfo> sortedValues = files.stream()
+				.sorted(Comparator.comparing(FileInfo::getCreatedAt).reversed())
+				.collect(Collectors.toList());
+		model.addAttribute("fileList", sortedValues);
+		return "index";
 	}
 
 }

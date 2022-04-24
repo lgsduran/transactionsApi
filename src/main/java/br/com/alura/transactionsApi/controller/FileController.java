@@ -6,8 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import br.com.alura.transactionsApi.entity.FileEntity;
-import br.com.alura.transactionsApi.service.FileServiceImpl;
+import br.com.alura.transactionsApi.entity.FileInfo;
+import br.com.alura.transactionsApi.service.FileInfoServiceImpl;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -15,11 +15,11 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/")
 public class FileController {
 	
-	private FileServiceImpl fileServiceImpl;
+	private FileInfoServiceImpl fileServiceImpl;
 	
-	@GetMapping("files")
-    public List<FileEntity> getAllFiles() {
-        return fileServiceImpl.getAllFiles();
+	@GetMapping("files1")
+    public List<FileInfo> getFiles() {
+        return fileServiceImpl.getFiles();
     }
 
 }

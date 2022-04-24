@@ -11,24 +11,22 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-@AllArgsConstructor
+@Data
+//@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
 @Entity
 @Table(name = "file")
-public class FileEntity {
+public class FileInfo {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "file_id")
 	private Long id;
 	@Column(name = "file_name")
-	private final String fileName;
+	private String fileName;
 	@CreationTimestamp
 	private Instant createdAt;
 

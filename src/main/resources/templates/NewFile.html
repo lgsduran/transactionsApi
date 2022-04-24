@@ -33,7 +33,7 @@
 					<th:block th:each="f : ${fileList}">
 						<tr>
 							<td class="align-middle" th:text="${f.fileName}"></td>
-							<td class="align-middle" th:text="${#dates.format(f.createdAt, 'dd.MM.yyyy')}"></td>
+							<td class="align-middle" th:text="${#dates.format(f.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
 						</tr>
 					</th:block>
 				</table>
