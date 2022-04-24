@@ -1,4 +1,4 @@
-package br.com.alura.transactionsApi.model;
+package br.com.alura.transactionsApi.entity;
 
 import java.time.Instant;
 

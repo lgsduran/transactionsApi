@@ -1,51 +1,38 @@
 package br.com.alura.transactionsApi.controller;
 
-import static br.com.alura.transactionsApi.config.MassaExecution.DadosExecucao;
+import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
-import br.com.alura.transactionsApi.repository.TransactionRepository;
+import br.com.alura.transactionsApi.service.JobServiceImpl;
+import lombok.AllArgsConstructor;
 
-@RestController
-@RequestMapping(path = "/batch")
+@Controller
+@AllArgsConstructor
 public class TransactionController {
-	
-	@Autowired
-	JobLauncher jobLauncher;
 
-	@Autowired
-	Job job;
-	
-	@Autowired
-	TransactionRepository transactionRepository;
-	
-	@PostMapping(path = "/start")
-	public String startBatch() {
-		DadosExecucao.setFirstDateFromFile(null);
-		DadosExecucao.setFlag(true);
-		DadosExecucao.setTable(transactionRepository.findAll().isEmpty());
-		
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("startAt", System.currentTimeMillis()).toJobParameters();
-        try {
-            jobLauncher.run(job, jobParameters);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException
-                | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+	private JobServiceImpl jobServiceImpl;
+//	private HttpServletRequest request;
 
-            e.printStackTrace();
-        }
-        return "Job Started...";
-    }
-
+	@PostMapping("/upload")
+	public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) throws Exception {
+		return jobServiceImpl.upload(file, attributes);
+	}
+	
+//	@PostMapping("/upload")
+//    public String upload(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+//        RedirectAttributes addFlashAttribute = redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + file.getOriginalFilename() + "!");
+//
+//        return "redirect:/";
+//    }
+//	
+	
 }

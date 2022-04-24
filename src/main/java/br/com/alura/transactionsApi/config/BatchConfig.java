@@ -8,19 +8,20 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
+import br.com.alura.transactionsApi.config.listeners.JobResultListener;
+import br.com.alura.transactionsApi.entity.Transaction;
 import br.com.alura.transactionsApi.exceptions.BusinessException;
-import br.com.alura.transactionsApi.model.Transaction;
 import br.com.alura.transactionsApi.repository.TransactionRepository;
 
 @Configuration
@@ -32,7 +33,10 @@ public class BatchConfig {
 	private TransactionRepository transactionRepository;
 //	private ItemReader<TransactionFile> delegate;
 //	private final String file_path = "/Users/luizduran/eclipse-workspace/alura-workspace/transactionsApi/inputFile/transacoes-2022-01-01.csv";
-	private final String file_path = "C:\\Users\\Qintess\\eclipse-workspace\\workspace-alura\\transactionsApi\\inputFile\\transacoes-2022-01-01.csv";
+//	private final String file_path = "C:\\Users\\Qintess\\eclipse-workspace\\workspace-alura\\transactionsApi\\inputFile\\transacoes-2022-01-01.csv";
+	
+	@Value("${value.filePath}")
+	private String file_path;
 
 	public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
 			TransactionRepository transactionRepository) {
@@ -82,10 +86,10 @@ public class BatchConfig {
 	public Step step() {
 		return stepBuilderFactory.get("Step")
 				.<TransactionFile, Transaction>chunk(3)
-				 .listener(new StepResultListener())
-				 .listener(new StepItemReadListener())
-				 .listener(new StepItemProcessListener())
-				 .listener(new StepItemWriteListener())
+//				 .listener(new StepResultListener())
+//				 .listener(new StepItemReadListener())
+//				 .listener(new StepItemProcessListener())
+//				 .listener(new StepItemWriteListener())
 				.reader(reader())
 				.processor(processor())
 				.writer(writer())

@@ -1,6 +1,6 @@
 package br.com.alura.transactionsApi.config;
 
-import static br.com.alura.transactionsApi.config.MassaExecution.DadosExecucao;
+import static br.com.alura.transactionsApi.extensions.MassaExecution.DadosExecucao;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 
 import org.springframework.batch.item.ItemProcessor;
 
+import br.com.alura.transactionsApi.entity.Transaction;
 import br.com.alura.transactionsApi.exceptions.BusinessException;
 import br.com.alura.transactionsApi.helpers.ExtractorHelper;
 import br.com.alura.transactionsApi.helpers.SupplierHelper;
-import br.com.alura.transactionsApi.model.Transaction;
 import br.com.alura.transactionsApi.repository.TransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TransactionProcessor implements ItemProcessor<TransactionFile, Transaction>  {
 
 	private TransactionRepository transactionRepository;
-//	private String firstDateFromFile = null;
 
 	public TransactionProcessor(TransactionRepository transactionRepository) {
 		this.transactionRepository = transactionRepository;

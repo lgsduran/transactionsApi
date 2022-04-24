@@ -1,4 +1,4 @@
-package br.com.alura.transactionsApi.config;
+package br.com.alura.transactionsApi.extensions;
 
 public class MassaExecution {
 	

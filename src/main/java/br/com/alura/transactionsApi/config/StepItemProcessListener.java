@@ -2,7 +2,7 @@ package br.com.alura.transactionsApi.config;
 
 import org.springframework.batch.core.ItemProcessListener;
 
-import br.com.alura.transactionsApi.model.Transaction;
+import br.com.alura.transactionsApi.entity.Transaction;
 
 public class StepItemProcessListener implements ItemProcessListener<TransactionFile, Transaction>  {
 
