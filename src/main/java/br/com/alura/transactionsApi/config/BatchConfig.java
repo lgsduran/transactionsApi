@@ -89,7 +89,7 @@ public class BatchConfig {
 				.<TransactionFile, Transaction>chunk(3)
 //				 .listener(new StepResultListener())
 //				 .listener(new StepItemReadListener())
-//				 .listener(new StepItemProcessListener())
+				 .listener(new StepItemProcessListener())
 //				 .listener(new StepItemWriteListener())
 				.reader(reader(null))
 				.processor(processor())

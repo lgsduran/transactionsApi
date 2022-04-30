@@ -64,8 +64,9 @@ public class TransactionProcessor implements ItemProcessor<TransactionFile, Tran
 			Optional<Transaction> registers = getRegisters(transactionRepository.findAll(),
 					x -> extractDateFromString(x.getDataHoraTransacao(), "T").equals(firstDateFromFile));
 			if (registers.isPresent())
-				return true;		
+				return true;			
 
+		DadosExecucao.setFlag(false);
 		return false;		
 	}
 	

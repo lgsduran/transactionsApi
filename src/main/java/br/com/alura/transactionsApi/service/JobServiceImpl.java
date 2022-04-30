@@ -69,15 +69,22 @@ public class JobServiceImpl implements IJobService {
 
 		JobExecution execution = jobLauncher.run(job, jobParameters);
 		if (execution.getStatus() == BatchStatus.FAILED) {
-			attributes.addFlashAttribute("message", "Job failed.");
+			Files.delete(path);
+			if(execution.getAllFailureExceptions().get(0).getCause() instanceof BusinessException ) {
+				attributes.addFlashAttribute("message", execution.getAllFailureExceptions().get(0).getCause().getMessage());
+				return "redirect:/";
+			}
+			
+			attributes.addFlashAttribute("message", "Job failed." );
 			return "redirect:/";
+			
 		}
 		
 		FileInfo fileInfo = new FileInfo();
 		fileInfo.setFileName(fileName);
 		this.fileInfoServiceImpl.save(fileInfo);
 		log.info("File added successfully.");
-
+		Files.delete(path);
 		attributes.addFlashAttribute("message", "You successfully uploaded " + fileName + '!');
 		return "redirect:/";
 	}	
