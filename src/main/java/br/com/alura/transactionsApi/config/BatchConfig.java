@@ -7,6 +7,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemWriter;
@@ -35,8 +36,8 @@ public class BatchConfig {
 //	private final String file_path = "/Users/luizduran/eclipse-workspace/alura-workspace/transactionsApi/inputFile/transacoes-2022-01-01.csv";
 //	private final String file_path = "C:\\Users\\Qintess\\eclipse-workspace\\workspace-alura\\transactionsApi\\inputFile\\transacoes-2022-01-01.csv";
 	
-	@Value("${value.filePath}")
-	private String file_path;
+//	@Value("${value.filePath}")
+//	private String file_path;
 
 	public BatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
 			TransactionRepository transactionRepository) {
@@ -90,7 +91,7 @@ public class BatchConfig {
 //				 .listener(new StepItemReadListener())
 //				 .listener(new StepItemProcessListener())
 //				 .listener(new StepItemWriteListener())
-				.reader(reader())
+				.reader(reader(null))
 				.processor(processor())
 				.writer(writer())
 				.faultTolerant()
@@ -100,14 +101,15 @@ public class BatchConfig {
 				.build();
 	}
 	
+	@StepScope
 	@Bean
-	public FlatFileItemReader<TransactionFile> reader() {
+	public FlatFileItemReader<TransactionFile> reader(@Value("#{jobParameters['INPUT_FILE_PATH']}") String file) {
         FlatFileItemReader<TransactionFile> flatFileItemReader =
             new FlatFileItemReader<TransactionFile>();
 
         flatFileItemReader.setResource(
             new FileSystemResource(
-                new File(file_path)));
+                new File((file))));
 
         flatFileItemReader.setLineMapper(new DefaultLineMapper<TransactionFile>(){
             {

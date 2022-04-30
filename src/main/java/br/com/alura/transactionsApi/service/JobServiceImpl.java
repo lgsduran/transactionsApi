@@ -68,8 +68,10 @@ public class JobServiceImpl implements IJobService {
 				.addLong("startAt", System.currentTimeMillis()).toJobParameters();
 
 		JobExecution execution = jobLauncher.run(job, jobParameters);
-		if (execution.getStatus() == BatchStatus.FAILED)
-			throw new BusinessException("Job " + execution.getJobId() + " is " + execution.getStatus());
+		if (execution.getStatus() == BatchStatus.FAILED) {
+			attributes.addFlashAttribute("message", "Job failed.");
+			return "redirect:/";
+		}
 		
 		FileInfo fileInfo = new FileInfo();
 		fileInfo.setFileName(fileName);

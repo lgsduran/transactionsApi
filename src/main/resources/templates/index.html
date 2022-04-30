@@ -13,7 +13,7 @@
 					<h1 class="text-center">Importar Transacoes</h1>
 					<p th:text="${message}" th:if="${message ne null}"
 						class="alert alert-primary"></p>
-					<form method="post" th:action="@{/upload}"
+					<form method="post" th:action="@{/}"
 						enctype="multipart/form-data">
 						<div class="form-group">
 							<input type="file" name="file" class="form-control-file">
@@ -33,7 +33,7 @@
 					<th:block th:each="f : ${fileList}">
 						<tr>
 							<td class="align-middle" th:text="${f.fileName}"></td>
-							<td class="align-middle" th:text="${#dates.format(f.createdAt, 'dd.MM.yyyy')}"></td>
+							<td class="align-middle" th:text="${#dates.format(f.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
 						</tr>
 					</th:block>
 				</table>
