@@ -47,8 +47,8 @@ public class JobServiceImpl implements IJobService {
 		DadosExecucao.setFirstDateFromFile(null);
 		DadosExecucao.setFlag(true);
 		DadosExecucao.setTable(transactionRepository.findAll().isEmpty());
-
-		if (file.isEmpty()) {
+		
+		if (file.isEmpty() || !StringUtils.getFilenameExtension(file.getOriginalFilename()).endsWith("csv")) {
 			attributes.addFlashAttribute("message", "Please, select a file to upload.");
 			return "redirect:/";
 		}
@@ -61,7 +61,7 @@ public class JobServiceImpl implements IJobService {
 				.addString("INPUT_FILE_PATH", path.toAbsolutePath().toString())
 				.addLong("startAt", System.currentTimeMillis()).toJobParameters();
 
-		var execution = jobLauncher.run(job, jobParameters);
+		var execution = this.jobLauncher.run(job, jobParameters);
 		if (execution.getStatus() == BatchStatus.FAILED) {
 			Files.delete(path);
 			if(execution.getAllFailureExceptions().get(0).getCause() instanceof BusinessException ) {

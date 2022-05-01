@@ -12,6 +12,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
@@ -96,6 +97,7 @@ public class BatchConfig {
 				.writer(writer())
 				.faultTolerant()
 				.noSkip(BusinessException.class)
+				.noSkip(FlatFileParseException.class)
 				.skip(Throwable.class)
 				.skipLimit(Integer.MAX_VALUE)			
 				.build();

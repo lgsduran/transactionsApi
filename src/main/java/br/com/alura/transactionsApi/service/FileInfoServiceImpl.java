@@ -16,7 +16,6 @@ public class FileInfoServiceImpl implements IFileInfoService {
 
 	@Override
 	public List<FileInfo> getFiles() {
-//		return this.fileInfoRepository.findAll();
 		return this.fileInfoRepository.findAllByOrderByCreatedAtDesc();
 	}
 
