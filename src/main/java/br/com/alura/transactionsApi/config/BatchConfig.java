@@ -88,8 +88,8 @@ public class BatchConfig {
 		return stepBuilderFactory.get("Step")
 				.<TransactionFile, Transaction>chunk(3)
 //				 .listener(new StepResultListener())
-//				 .listener(new StepItemReadListener())
-				 .listener(new StepItemProcessListener())
+				 .listener(new StepItemReadListener())
+//				 .listener(new StepItemProcessListener())
 //				 .listener(new StepItemWriteListener())
 				.reader(reader(null))
 				.processor(processor())
@@ -104,8 +104,7 @@ public class BatchConfig {
 	@StepScope
 	@Bean
 	public FlatFileItemReader<TransactionFile> reader(@Value("#{jobParameters['INPUT_FILE_PATH']}") String file) {
-        FlatFileItemReader<TransactionFile> flatFileItemReader =
-            new FlatFileItemReader<TransactionFile>();
+        var flatFileItemReader = new FlatFileItemReader<TransactionFile>();
 
         flatFileItemReader.setResource(
             new FileSystemResource(

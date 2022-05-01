@@ -4,17 +4,11 @@ import static br.com.alura.transactionsApi.extensions.MassaExecution.DadosExecuc
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.stereotype.Service;
@@ -40,7 +34,8 @@ public class JobServiceImpl implements IJobService {
 //	@Value("${value.filePath}")
 	private final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "inputFile" + File.separator;
 
-	public JobServiceImpl(JobLauncher jobLauncher, Job job, TransactionRepository transactionRepository, FileInfoServiceImpl fileInfoServiceImpl) {
+	public JobServiceImpl(JobLauncher jobLauncher, Job job, TransactionRepository transactionRepository,
+			FileInfoServiceImpl fileInfoServiceImpl) {
 		this.jobLauncher = jobLauncher;
 		this.job = job;
 		this.transactionRepository = transactionRepository;
@@ -58,29 +53,26 @@ public class JobServiceImpl implements IJobService {
 			return "redirect:/";
 		}
 
-		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-		Path path = Paths.get(UPLOAD_DIR + fileName);
+		var fileName = StringUtils.cleanPath(file.getOriginalFilename());
+		var path = Paths.get(UPLOAD_DIR + fileName);
 		Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
-		JobParameters jobParameters = new JobParametersBuilder()
+		var jobParameters = new JobParametersBuilder()
 				.addString("INPUT_FILE_PATH", path.toAbsolutePath().toString())
 				.addLong("startAt", System.currentTimeMillis()).toJobParameters();
 
-		JobExecution execution = jobLauncher.run(job, jobParameters);
+		var execution = jobLauncher.run(job, jobParameters);
 		if (execution.getStatus() == BatchStatus.FAILED) {
 			Files.delete(path);
 			if(execution.getAllFailureExceptions().get(0).getCause() instanceof BusinessException ) {
 				attributes.addFlashAttribute("message", execution.getAllFailureExceptions().get(0).getCause().getMessage());
 				return "redirect:/";
-			}
-			
+			}			
 			attributes.addFlashAttribute("message", "Job failed." );
-			return "redirect:/";
-			
+			return "redirect:/";			
 		}
 		
-		FileInfo fileInfo = new FileInfo();
+		var fileInfo = new FileInfo();
 		fileInfo.setFileName(fileName);
 		this.fileInfoServiceImpl.save(fileInfo);
 		log.info("File added successfully.");
@@ -92,11 +84,8 @@ public class JobServiceImpl implements IJobService {
 	@Override
 	public String getFiles(Model model) {
 		log.info("Get Files");
-		List<FileInfo> files = this.fileInfoServiceImpl.getFiles();
-		List<FileInfo> sortedValues = files.stream()
-				.sorted(Comparator.comparing(FileInfo::getCreatedAt).reversed())
-				.collect(Collectors.toList());
-		model.addAttribute("fileList", sortedValues);
+		var files = this.fileInfoServiceImpl.getFiles();
+		model.addAttribute("fileList", files);
 		return "index";
 	}
 
